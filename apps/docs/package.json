@@ -5,8 +5,7 @@
     "dev": "mint dev --port 3005 --no-open",
     "openapi:check": "mint openapi-check openapi/openapi.json"
   },
-
   "devDependencies": {
-    "mint": "^4.2.367"
+    "mint": "^4.2.391"
   }
 }
