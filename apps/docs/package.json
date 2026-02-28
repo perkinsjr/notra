@@ -2,7 +2,7 @@
   "name": "docs",
   "type": "module",
   "scripts": {
-    "dev": "mint dev --port 3005",
+    "dev": "mint dev --port 3005 --no-open",
     "openapi:check": "mint openapi-check openapi/openapi.json"
   },
 
