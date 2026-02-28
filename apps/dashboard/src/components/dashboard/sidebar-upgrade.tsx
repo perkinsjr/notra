@@ -63,7 +63,7 @@ export function SidebarUpgrade() {
       <div className="rounded-lg border bg-sidebar p-4">
         <p className="font-semibold text-sm">Upgrade to Pro</p>
         <p className="mt-1 text-muted-foreground text-xs">
-          Unlock higher limits, invite team members, and get more storage.
+          Get more team seats, unlimited integrations, and higher usage limits.
         </p>
         <Button
           className="mt-3 w-full"
