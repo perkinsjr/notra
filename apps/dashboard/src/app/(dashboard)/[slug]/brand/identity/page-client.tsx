@@ -309,7 +309,7 @@ function VoiceSelector({
     <div className="flex gap-3 overflow-x-auto pb-1">
       {voices.map((voice) => (
         <button
-          className={`flex min-w-[10rem] shrink-0 flex-col gap-1.5 rounded-lg border px-4 py-3 text-left transition-colors ${
+          className={`flex min-w-[10rem] shrink-0 cursor-pointer flex-col gap-1.5 rounded-lg border px-4 py-3 text-left transition-colors ${
             voice.id === activeVoiceId
               ? "border-primary bg-primary/5"
               : "border-border hover:border-primary/40"
@@ -876,6 +876,7 @@ function BrandForm({
               <div className="space-y-2">
                 <Label>Language</Label>
                 <Combobox
+                  items={LANGUAGE_OPTIONS}
                   onValueChange={(value) => {
                     if (value) {
                       field.handleChange(value);
@@ -885,14 +886,14 @@ function BrandForm({
                 >
                   <ComboboxInput placeholder="Select language..." />
                   <ComboboxContent>
+                    <ComboboxEmpty>No language found</ComboboxEmpty>
                     <ComboboxList>
-                      {LANGUAGE_OPTIONS.map((lang) => (
+                      {(lang) => (
                         <ComboboxItem key={lang} value={lang}>
                           {lang}
                         </ComboboxItem>
-                      ))}
+                      )}
                     </ComboboxList>
-                    <ComboboxEmpty>No language found</ComboboxEmpty>
                   </ComboboxContent>
                 </Combobox>
               </div>
