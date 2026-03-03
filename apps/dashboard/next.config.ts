@@ -30,6 +30,30 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
+    const cspDirectives = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' cal.com",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self'",
+      [
+        "img-src 'self' data: blob:",
+        "i.pravatar.cc",
+        "api.dicebear.com",
+        process.env.CLOUDFLARE_PUBLIC_URL
+          ? new URL(process.env.CLOUDFLARE_PUBLIC_URL).hostname
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" "),
+      "connect-src 'self' *.databuddy.cc",
+      "frame-src 'self' cal.com",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "upgrade-insecure-requests",
+    ];
+
     return [
       {
         source: "/(.*)",
@@ -49,6 +73,18 @@ const nextConfig: NextConfig = {
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
+          },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          {
+            key: "X-DNS-Prefetch-Control",
+            value: "on",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: cspDirectives.join("; "),
           },
         ],
       },
