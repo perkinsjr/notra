@@ -107,7 +107,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="flex items-start justify-center self-stretch sm:hidden">
+          <div className="flex items-start justify-center self-stretch md:hidden">
             <div className="relative w-4 self-stretch overflow-hidden">
               <div className="-top-30 -left-10 absolute flex w-30 flex-col items-start justify-start">
                 {Array.from({ length: 50 }).map((_, i) => (
@@ -151,7 +151,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="hidden items-start justify-center self-stretch sm:flex">
+          <div className="hidden items-start justify-center self-stretch md:flex">
             <div className="relative w-6 self-stretch overflow-hidden md:w-8 lg:w-12">
               <div className="-top-30 -left-12.5 md:-left-14.5 absolute flex w-35 flex-col items-start justify-start md:w-40.5">
                 {Array.from({ length: 50 }).map((_, i) => (
