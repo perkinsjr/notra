@@ -49,6 +49,7 @@ import type { BrandSettings } from "@/types/hooks/brand-analysis";
 import type { GitHubIntegration } from "@/types/integrations";
 import type { Trigger } from "@/types/triggers/triggers";
 import { formatSnakeCaseLabel } from "@/utils/format";
+import { OutputTypeIcon } from "@/utils/output-types";
 import { QUERY_KEYS } from "@/utils/query-keys";
 import { SchedulePicker } from "./trigger-schedule-picker";
 
@@ -668,11 +669,17 @@ export function AddTriggerDialog({
                     >
                       <SelectTrigger className="w-full" id={field.name}>
                         <SelectValue placeholder="Output">
-                          {
-                            OUTPUT_OPTIONS.find(
-                              (o) => o.value === field.state.value
-                            )?.label
-                          }
+                          <span className="flex items-center gap-2">
+                            <OutputTypeIcon
+                              className="size-4"
+                              outputType={field.state.value}
+                            />
+                            {
+                              OUTPUT_OPTIONS.find(
+                                (o) => o.value === field.state.value
+                              )?.label
+                            }
+                          </span>
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
@@ -682,8 +689,14 @@ export function AddTriggerDialog({
                             key={option.value}
                             value={option.value}
                           >
-                            {option.label}
-                            {option.disabled ? " (Coming soon)" : ""}
+                            <span className="flex items-center gap-2">
+                              <OutputTypeIcon
+                                className="size-4"
+                                outputType={option.value}
+                              />
+                              {option.label}
+                              {option.disabled ? " (Coming soon)" : ""}
+                            </span>
                           </SelectItem>
                         ))}
                       </SelectContent>

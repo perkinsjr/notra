@@ -36,7 +36,7 @@ import { PageContainer } from "@/components/layout/container";
 import { useOrganizationsContext } from "@/components/providers/organization-provider";
 import type { BrandSettings } from "@/types/hooks/brand-analysis";
 import type { Trigger, TriggerSourceType } from "@/types/triggers/triggers";
-import { getOutputTypeLabel } from "@/utils/output-types";
+import { getOutputTypeLabel, OutputTypeIcon } from "@/utils/output-types";
 import { QUERY_KEYS } from "@/utils/query-keys";
 
 const EVENT_SOURCE_TYPES: TriggerSourceType[] = ["github_webhook"];
@@ -432,7 +432,13 @@ function EventTable({
                   />
                 </TableCell>
                 <TableCell className="text-muted-foreground capitalize">
-                  {getOutputTypeLabel(trigger.outputType)}
+                  <span className="flex items-center gap-1.5">
+                    <OutputTypeIcon
+                      className="size-3.5"
+                      outputType={trigger.outputType}
+                    />
+                    {getOutputTypeLabel(trigger.outputType)}
+                  </span>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {trigger.targets.repositoryIds.length} repositories
