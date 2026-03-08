@@ -26,6 +26,7 @@ import {
 import { Button } from "@notra/ui/components/ui/button";
 import { Input } from "@notra/ui/components/ui/input";
 import { Label } from "@notra/ui/components/ui/label";
+import { XVerifiedBadge } from "@notra/ui/components/ui/svgs/twitter";
 import { Textarea } from "@notra/ui/components/ui/textarea";
 import {
   Tooltip,
@@ -40,8 +41,8 @@ import { FEATURES } from "@/constants/features";
 import {
   type ConnectedAccount,
   useConnectedAccounts,
-  useConnectTwitter,
   useDisconnectAccount,
+  useHandleConnectTwitter,
 } from "@/lib/hooks/use-connected-accounts";
 import type {
   AddReferenceDialogProps,
@@ -357,7 +358,8 @@ function ImportXStep({
   onClose: () => void;
 }) {
   const { data, isLoading } = useConnectedAccounts(organizationId);
-  const connectTwitter = useConnectTwitter(organizationId);
+  const { handleConnect, isPending: isConnecting } =
+    useHandleConnectTwitter(organizationId);
   const disconnectAccount = useDisconnectAccount(organizationId);
   const importTweets = useImportTweets(organizationId, voiceId);
   const [selectedAccount, setSelectedAccount] =
@@ -376,19 +378,6 @@ function ImportXStep({
 
   const twitterAccounts =
     data?.accounts.filter((a) => a.provider === "twitter") ?? [];
-
-  const handleConnect = async () => {
-    try {
-      const result = await connectTwitter.mutateAsync(
-        window.location.pathname + window.location.search
-      );
-      window.location.href = result.url;
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to connect X account"
-      );
-    }
-  };
 
   const handleDisconnect = async (account: ConnectedAccount) => {
     try {
@@ -523,8 +512,11 @@ function ImportXStep({
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-sm">
+                  <p className="flex items-center gap-1 truncate font-medium text-sm">
                     {account.displayName}
+                    {account.verified && (
+                      <XVerifiedBadge className="size-4 shrink-0" />
+                    )}
                   </p>
                   <p className="truncate text-muted-foreground text-xs">
                     @{account.username}
@@ -561,12 +553,12 @@ function ImportXStep({
         {!isLoading && (
           <button
             className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-dashed p-3 text-left transition-colors hover:bg-muted/50"
-            disabled={connectTwitter.isPending}
+            disabled={isConnecting}
             onClick={handleConnect}
             type="button"
           >
             <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
-              {connectTwitter.isPending ? (
+              {isConnecting ? (
                 <Loader2Icon className="size-4 animate-spin" />
               ) : (
                 <HugeiconsIcon className="size-4" icon={Add01Icon} />
