@@ -1,6 +1,5 @@
-import { withSupermemory } from "@supermemory/tools/ai-sdk";
 import { stepCountIs, ToolLoopAgent } from "ai";
-import { gateway } from "@/lib/ai/gateway";
+import { createModel } from "@/lib/ai/model";
 import { getCasualChangelogPrompt } from "@/lib/ai/prompts/changelog/casual";
 import { getConversationalChangelogPrompt } from "@/lib/ai/prompts/changelog/conversational";
 import { getFormalChangelogPrompt } from "@/lib/ai/prompts/changelog/formal";
@@ -51,10 +50,7 @@ export async function generateChangelog(
     );
   }
 
-  const model = withSupermemory(
-    gateway("anthropic/claude-haiku-4.5"),
-    organizationId
-  );
+  const model = createModel(organizationId, "anthropic/claude-haiku-4.5");
 
   const resolvedTone = getValidToneProfile(tone, "Conversational");
 
