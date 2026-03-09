@@ -62,6 +62,8 @@ export interface BrandFormProps {
   organizationId: string;
   voiceId: string;
   initialData: BrandFormInitialData;
+  onSavingChange?: (isSaving: boolean) => void;
+  onSavedAtChange?: (savedAt: Date) => void;
 }
 
 export type StepIconState = "pending" | "active" | "completed";

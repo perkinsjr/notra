@@ -17,13 +17,14 @@ import {
   TabsTrigger,
 } from "@notra/ui/components/ui/tabs";
 import { parseAsString, parseAsStringLiteral, useQueryState } from "nuqs";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 // biome-ignore lint/performance/noNamespaceImport: Zod recommended way of importing
 import * as z from "zod";
 import { PageContainer } from "@/components/layout/container";
 import { useOrganizationsContext } from "@/components/providers/organization-provider";
 import { getValidLanguage, type ToneProfile } from "@/schemas/brand";
+import { formatRelativeTime } from "@/utils/format";
 import {
   useAnalyzeBrand,
   useBrandAnalysisProgress,
@@ -120,9 +121,38 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
     selectedVoice?.id ?? ""
   );
   const referenceCount = referencesData?.references.length ?? 0;
+  const selectedVoiceId = selectedVoice?.id;
+  const selectedVoiceUpdatedAt = selectedVoice?.updatedAt;
 
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSavedAtMs, setLastSavedAtMs] = useState<number | null>(null);
+  const [relativeTimeNow, setRelativeTimeNow] = useState(() => Date.now());
   const [url, setUrl] = useState("");
   const effectiveUrl = url.trim();
+
+  useEffect(() => {
+    if (!selectedVoiceId || !selectedVoiceUpdatedAt) {
+      setLastSavedAtMs(null);
+      return;
+    }
+
+    setLastSavedAtMs(new Date(selectedVoiceUpdatedAt).getTime());
+  }, [selectedVoiceId, selectedVoiceUpdatedAt]);
+
+  useEffect(() => {
+    if (activeTab !== "identity" || isSaving || !lastSavedAtMs) {
+      return;
+    }
+
+    setRelativeTimeNow(Date.now());
+    const interval = window.setInterval(() => {
+      setRelativeTimeNow(Date.now());
+    }, 10_000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [activeTab, isSaving, lastSavedAtMs]);
 
   const triggerAnalysis = async (rawUrl: string, voiceId?: string) => {
     let urlToAnalyze = rawUrl.trim();
@@ -312,6 +342,16 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
     audience: selectedVoice.audience ?? "",
     language: getValidLanguage(selectedVoice.language),
   };
+  let saveStatusText = "Saved just now";
+
+  if (isSaving) {
+    saveStatusText = "Saving...";
+  } else if (lastSavedAtMs) {
+    saveStatusText = formatRelativeTime(
+      new Date(lastSavedAtMs),
+      relativeTimeNow
+    );
+  }
 
   return (
     <PageContainer className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -377,22 +417,31 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
           }}
           value={activeTab}
         >
-          <TabsList variant="line">
-            <TabsTrigger value="identity">Identity</TabsTrigger>
-            <TabsTrigger value="references">
-              References
-              {referenceCount > 0 && (
-                <span className="text-muted-foreground">
-                  ({referenceCount})
-                </span>
-              )}
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between">
+            <TabsList variant="line">
+              <TabsTrigger value="identity">Identity</TabsTrigger>
+              <TabsTrigger value="references">
+                References
+                {referenceCount > 0 && (
+                  <span className="text-muted-foreground">
+                    ({referenceCount})
+                  </span>
+                )}
+              </TabsTrigger>
+            </TabsList>
+            {activeTab === "identity" && (
+              <span className="text-muted-foreground text-xs">
+                {saveStatusText}
+              </span>
+            )}
+          </div>
 
           <TabsContent className="mt-6" value="identity">
             <BrandForm
               initialData={initialData}
               key={selectedVoice.id}
+              onSavedAtChange={(savedAt) => setLastSavedAtMs(savedAt.getTime())}
+              onSavingChange={setIsSaving}
               organizationId={organizationId}
               voiceId={selectedVoice.id}
             />
