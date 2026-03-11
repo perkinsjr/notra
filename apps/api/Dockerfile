@@ -1,16 +1,16 @@
 # syntax=docker/dockerfile:1
+# Build from the monorepo root:
+#   docker build -f apps/api/Dockerfile -t notra-api .
 
 # ─── Stage 1: base ────────────────────────────────────────────────────────────
 FROM node:24-alpine AS base
-
 RUN corepack enable && corepack prepare bun@1.3.9 --activate
-
 WORKDIR /app
 
 # ─── Stage 2: install dependencies ────────────────────────────────────────────
 FROM base AS deps
 
-# Copy workspace manifests needed to resolve the dependency graph
+# Copy workspace manifests needed to resolve the full dependency graph
 COPY package.json bun.lock ./
 COPY apps/api/package.json ./apps/api/package.json
 COPY packages/db/package.json ./packages/db/package.json
@@ -41,8 +41,7 @@ WORKDIR /app
 # node_modules contains all runtime deps (including workspace package symlinks)
 COPY --from=builder --chown=hono:nodejs /app/node_modules ./node_modules
 
-# Workspace package sources are needed because @notra/db exports raw .ts files
-# resolved through the symlink in node_modules at runtime
+# @notra/db exports raw .ts files resolved via the node_modules symlink at runtime
 COPY --from=builder --chown=hono:nodejs /app/packages/db ./packages/db
 
 # The compiled API bundle and its manifest
