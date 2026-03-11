@@ -2,17 +2,10 @@
 # Build from the monorepo root:
 #   docker build -f apps/api/Dockerfile -t notra-api .
 
-# ─── Stage 1: base ────────────────────────────────────────────────────────────
-FROM node:24-alpine AS base
-RUN apk add --no-cache curl unzip \
-  && curl -fsSL "https://github.com/oven-sh/bun/releases/download/bun-v1.3.9/bun-linux-x64-baseline.zip" -o /tmp/bun.zip \
-  && unzip -q /tmp/bun.zip -d /tmp \
-  && mv /tmp/bun-linux-x64-baseline/bun /usr/local/bin/bun \
-  && rm -rf /tmp/bun.zip /tmp/bun-linux-x64-baseline
-WORKDIR /app
+# ─── Stage 1: install dependencies ───────────────────────────────────────────
+FROM oven/bun:1.3.9-alpine AS deps
 
-# ─── Stage 2: install dependencies ────────────────────────────────────────────
-FROM base AS deps
+WORKDIR /app
 
 # Copy workspace manifests needed to resolve the full dependency graph
 COPY package.json bun.lock ./
@@ -23,7 +16,7 @@ COPY packages/typescript-config/package.json ./packages/typescript-config/packag
 # Install all workspace deps (frozen lockfile for reproducibility)
 RUN bun install --frozen-lockfile
 
-# ─── Stage 3: build ───────────────────────────────────────────────────────────
+# ─── Stage 2: build ──────────────────────────────────────────────────────────
 FROM deps AS builder
 
 # Copy source for all packages the API depends on
@@ -34,7 +27,7 @@ COPY apps/api ./apps/api
 WORKDIR /app/apps/api
 RUN bun run build
 
-# ─── Stage 4: production image ────────────────────────────────────────────────
+# ─── Stage 3: production image ───────────────────────────────────────────────
 FROM node:24-alpine AS runner
 
 RUN addgroup --system --gid 1001 nodejs \
