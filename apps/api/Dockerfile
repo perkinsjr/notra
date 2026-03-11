@@ -5,7 +5,10 @@
 # ─── Stage 1: base ────────────────────────────────────────────────────────────
 FROM node:24-alpine AS base
 RUN apk add --no-cache curl unzip \
-  && curl -fsSL https://bun.sh/install | BUN_INSTALL=/usr bash -s "bun-v1.3.9"
+  && curl -fsSL "https://github.com/oven-sh/bun/releases/download/bun-v1.3.9/bun-linux-x64-baseline.zip" -o /tmp/bun.zip \
+  && unzip -q /tmp/bun.zip -d /tmp \
+  && mv /tmp/bun-linux-x64-baseline/bun /usr/local/bin/bun \
+  && rm -rf /tmp/bun.zip /tmp/bun-linux-x64-baseline
 WORKDIR /app
 
 # ─── Stage 2: install dependencies ────────────────────────────────────────────
