@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Build from the monorepo root:
+# Build from the monorepo root: because we can
 #   docker build -f apps/api/Dockerfile -t notra-api .
 
 # ─── Stage 1: install dependencies ───────────────────────────────────────────
