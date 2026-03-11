@@ -4,7 +4,8 @@
 
 # ─── Stage 1: base ────────────────────────────────────────────────────────────
 FROM node:24-alpine AS base
-RUN corepack enable && corepack prepare bun@1.3.9 --activate
+RUN apk add --no-cache curl unzip \
+  && curl -fsSL https://bun.sh/install | BUN_INSTALL=/usr bash -s "bun-v1.3.9"
 WORKDIR /app
 
 # ─── Stage 2: install dependencies ────────────────────────────────────────────
