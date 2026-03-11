@@ -1,16 +1,11 @@
+import { serve } from "@hono/node-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { createDb } from "@notra/db/drizzle-http";
 import { trimTrailingSlash } from "hono/trailing-slash";
 import { authMiddleware } from "./middleware/auth";
 import { contentRoutes } from "./routes/content";
 
-interface Bindings {
-  UNKEY_ROOT_KEY: string;
-  DATABASE_URL: string;
-}
-
 interface AppEnv {
-  Bindings: Bindings;
   Variables: {
     db: ReturnType<typeof createDb>;
   };
@@ -21,7 +16,11 @@ const app = new OpenAPIHono<AppEnv>({ strict: true });
 app.use(trimTrailingSlash({ alwaysRedirect: true }));
 
 app.use("/v1/*", async (c, next) => {
-  c.set("db", createDb(c.env.DATABASE_URL));
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    return c.json({ error: "DATABASE_URL is not configured" }, 503);
+  }
+  c.set("db", createDb(databaseUrl));
   await next();
 });
 
@@ -68,5 +67,11 @@ app.doc31("/openapi.json", (_c) => ({
     },
   ],
 }));
+
+const port = Number(process.env.PORT) || 3000;
+
+serve({ fetch: app.fetch, port }, (info) => {
+  console.log(`API server listening on http://localhost:${info.port}`);
+});
 
 export default app;

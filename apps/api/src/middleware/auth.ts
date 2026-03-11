@@ -28,8 +28,13 @@ export function authMiddleware(options: AuthOptions = {}) {
       return c.json({ error: "Missing API key" }, 401);
     }
 
+    const unkeyRootKey = process.env.UNKEY_ROOT_KEY;
+    if (!unkeyRootKey) {
+      return c.json({ error: "UNKEY_ROOT_KEY is not configured" }, 503);
+    }
+
     try {
-      const unkey = new Unkey({ rootKey: c.env.UNKEY_ROOT_KEY });
+      const unkey = new Unkey({ rootKey: unkeyRootKey });
       const result = await unkey.keys.verifyKey({
         key: apiKey,
         permissions: options.permissions,

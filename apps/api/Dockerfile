@@ -1,0 +1,61 @@
+# syntax=docker/dockerfile:1
+
+# ─── Stage 1: base ────────────────────────────────────────────────────────────
+FROM node:24-alpine AS base
+
+RUN corepack enable && corepack prepare bun@1.3.9 --activate
+
+WORKDIR /app
+
+# ─── Stage 2: install dependencies ────────────────────────────────────────────
+FROM base AS deps
+
+# Copy workspace manifests needed to resolve the dependency graph
+COPY package.json bun.lock ./
+COPY apps/api/package.json ./apps/api/package.json
+COPY packages/db/package.json ./packages/db/package.json
+COPY packages/typescript-config/package.json ./packages/typescript-config/package.json
+
+# Install all workspace deps (frozen lockfile for reproducibility)
+RUN bun install --frozen-lockfile
+
+# ─── Stage 3: build ───────────────────────────────────────────────────────────
+FROM deps AS builder
+
+# Copy source for all packages the API depends on
+COPY packages/typescript-config ./packages/typescript-config
+COPY packages/db ./packages/db
+COPY apps/api ./apps/api
+
+WORKDIR /app/apps/api
+RUN bun run build
+
+# ─── Stage 4: production image ────────────────────────────────────────────────
+FROM node:24-alpine AS runner
+
+RUN addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 hono
+
+WORKDIR /app
+
+# node_modules contains all runtime deps (including workspace package symlinks)
+COPY --from=builder --chown=hono:nodejs /app/node_modules ./node_modules
+
+# Workspace package sources are needed because @notra/db exports raw .ts files
+# resolved through the symlink in node_modules at runtime
+COPY --from=builder --chown=hono:nodejs /app/packages/db ./packages/db
+
+# The compiled API bundle and its manifest
+COPY --from=builder --chown=hono:nodejs /app/apps/api/dist ./apps/api/dist
+COPY --from=builder --chown=hono:nodejs /app/apps/api/package.json ./apps/api/package.json
+
+USER hono
+
+WORKDIR /app/apps/api
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+EXPOSE 3000
+
+CMD ["node", "dist/index.js"]

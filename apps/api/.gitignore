@@ -10,12 +10,14 @@
 
 # deps
 node_modules/
-.wrangler
+
+# build output
+dist/
 
 # env
 .env
 .env.production
-.dev.vars
+.env.local
 
 # logs
 logs/
@@ -28,4 +30,3 @@ lerna-debug.log*
 
 # misc
 .DS_Store
-.vercel
