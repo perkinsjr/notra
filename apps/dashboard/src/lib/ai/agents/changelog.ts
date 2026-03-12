@@ -72,9 +72,12 @@ export async function generateChangelog(
 
   const agent = new ToolLoopAgent({
     model,
-    experimental_telemetry: getAISDKTelemetry("generateChangelog", {
-      agent: "changelog",
-      contentType: "changelog",
+    experimental_telemetry: await getAISDKTelemetry("generateChangelog", {
+      organizationId,
+      metadata: {
+        agent: "changelog",
+        contentType: "changelog",
+      },
     }),
     providerOptions: {
       anthropic: {

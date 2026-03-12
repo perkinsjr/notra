@@ -70,9 +70,12 @@ export async function generateBlogPost(
 
   const agent = new ToolLoopAgent({
     model,
-    experimental_telemetry: getAISDKTelemetry("generateBlogPost", {
-      agent: "blog_post",
-      contentType: "blog_post",
+    experimental_telemetry: await getAISDKTelemetry("generateBlogPost", {
+      organizationId,
+      metadata: {
+        agent: "blog_post",
+        contentType: "blog_post",
+      },
     }),
     providerOptions: {
       anthropic: {

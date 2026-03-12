@@ -72,9 +72,12 @@ export async function generateTwitterPost(
 
   const agent = new ToolLoopAgent({
     model,
-    experimental_telemetry: getAISDKTelemetry("generateTwitterPost", {
-      agent: "twitter",
-      contentType: "twitter_post",
+    experimental_telemetry: await getAISDKTelemetry("generateTwitterPost", {
+      organizationId,
+      metadata: {
+        agent: "twitter",
+        contentType: "twitter_post",
+      },
     }),
     providerOptions: {
       anthropic: {

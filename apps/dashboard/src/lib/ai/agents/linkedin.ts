@@ -72,9 +72,12 @@ export async function generateLinkedInPost(
 
   const agent = new ToolLoopAgent({
     model,
-    experimental_telemetry: getAISDKTelemetry("generateLinkedInPost", {
-      agent: "linkedin",
-      contentType: "linkedin_post",
+    experimental_telemetry: await getAISDKTelemetry("generateLinkedInPost", {
+      organizationId,
+      metadata: {
+        agent: "linkedin",
+        contentType: "linkedin_post",
+      },
     }),
     providerOptions: {
       anthropic: {
